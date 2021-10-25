@@ -1,0 +1,11 @@
+{
+  "name": "svg-logo-nft",
+  "version": "1.0.0",
+  "description": "This is a proof of concept on deploying to the Etherium Blockchain both test and main",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Mochkai",
+  "license": "ISC"
+}

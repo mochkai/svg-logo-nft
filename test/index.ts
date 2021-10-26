@@ -1,11 +1,14 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { readFileSync } from 'fs';
+import { MochkaiLogo } from "../typechain";
 
 describe("MockaiLogoContract", function () {
 
   let tokenURI = '';
   let metadata = '';
+  let maxSupply = -1;
+  let contract: any;
 
   before(async function () {
     const svgLogo = readFileSync('./assets/logo.svg', 'utf-8').toString();
@@ -15,10 +18,13 @@ describe("MockaiLogoContract", function () {
     });
 
     const MKLContract = await ethers.getContractFactory("MochkaiLogo");
-    const contract = await MKLContract.deploy();
+    contract = await MKLContract.deploy();
     await contract.deployed();
 
+    maxSupply = (await contract.getMaxSupply()).toNumber();
+
     const transaction = await contract.create(metadata);
+
     const tx = await transaction.wait() // Waiting for the token to be minted
 
     if (tx.events && tx.events.length > 0) {
@@ -26,7 +32,7 @@ describe("MockaiLogoContract", function () {
       if (event.args) {
         const value = event.args[2];
         const tokenId = value.toNumber(); // Getting the tokenID
-        tokenURI = await contract.tokenURI(tokenId) // Using the tokenURI from ERC721 to retrieve de metadata
+        tokenURI = await contract.tokenURI(tokenId); // Using the tokenURI from ERC721 to retrieve de metadata
       }
     }
   });
@@ -37,5 +43,33 @@ describe("MockaiLogoContract", function () {
 
   it("Should not fail minting", async function () {
     expect(tokenURI).to.not.be.equal(''); // Comparing and testing
+  });
+
+  it("Should only mint up to maxSupply", async function () {
+    let transactions = [];
+
+    for (var i = 2; i <= maxSupply; i++) {
+      transactions[i] = await contract.create(metadata);
+
+      const tx = await transactions[i].wait();
+
+      if (tx.events && tx.events.length > 0) {
+        const event = tx.events[0];
+        if (event.args) {
+          const value = event.args[2];
+          const tokenId = value.toNumber(); // Getting the tokenID
+
+          expect(tokenId).to.be.equal((await contract.totalSupply()).toNumber());
+        }
+      }
+    }
+  });
+
+  it("Should fail mint above max Supply", async function () {
+    await expect(contract.create(metadata)).to.be.revertedWith('Max supply reached');
+  });
+
+  it("Total Supply should be equal or less than max Supply", async function () {
+    await expect((await contract.totalSupply()).toNumber()).to.be.lessThanOrEqual(maxSupply);
   });
 });

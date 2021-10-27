@@ -1,20 +1,22 @@
+/* eslint-disable prettier/prettier */
+/* eslint-disable no-unmodified-loop-condition */
+/* eslint-disable prefer-const */
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { readFileSync } from 'fs';
-import { MochkaiLogo } from "../typechain";
+import { readFileSync } from "fs";
 
 describe("MockaiLogoContract", function () {
 
-  let tokenURI = '';
-  let metadata = '';
+  let tokenURI = "";
+  let metadata = "";
   let maxSupply = -1;
   let contract: any;
 
   before(async function () {
-    const svgLogo = readFileSync('./assets/logo.svg', 'utf-8').toString();
+    const svgLogo = readFileSync("./assets/logo.svg", "utf-8").toString();
     metadata = JSON.stringify({
-      "name": "Original logo",
-      "image": "data:image/svg+xml;base64," + Buffer.from(svgLogo, 'binary').toString('base64')
+      name: "Original logo",
+      image: "data:image/svg+xml;base64," + Buffer.from(svgLogo, "binary").toString("base64"),
     });
 
     const MKLContract = await ethers.getContractFactory("MochkaiLogo");
@@ -42,13 +44,13 @@ describe("MockaiLogoContract", function () {
   });
 
   it("Should not fail minting", async function () {
-    expect(tokenURI).to.not.be.equal(''); // Comparing and testing
+    expect(tokenURI).to.not.be.equal(""); // Comparing and testing
   });
 
   it("Should only mint up to maxSupply", async function () {
-    let transactions = [];
+    let transactions: any = [];
 
-    for (var i = 2; i <= maxSupply; i++) {
+    for (let i = 2; i <= maxSupply; i++) {
       transactions[i] = await contract.create(metadata);
 
       const tx = await transactions[i].wait();
@@ -66,7 +68,7 @@ describe("MockaiLogoContract", function () {
   });
 
   it("Should fail mint above max Supply", async function () {
-    await expect(contract.create(metadata)).to.be.revertedWith('Max supply reached');
+    await expect(contract.create(metadata)).to.be.revertedWith("Max supply reached");
   });
 
   it("Total Supply should be equal or less than max Supply", async function () {

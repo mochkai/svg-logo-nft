@@ -10,7 +10,7 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 contract MochkaiLogo is ERC721URIStorage, ERC721Enumerable, Ownable {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
-    uint256 private maxSupply = 10;
+    uint256 private constant MAX_SUPPLY = 10;
 
     event TokenCreated(uint256 tokenId);
 
@@ -20,7 +20,7 @@ contract MochkaiLogo is ERC721URIStorage, ERC721Enumerable, Ownable {
 
     function create(string memory _tokenURI) public
     {
-      require(_tokenIds.current() < maxSupply, "Max supply reached");
+      require(_tokenIds.current() < MAX_SUPPLY, "Max supply reached");
 
       _tokenIds.increment();
 
@@ -31,8 +31,8 @@ contract MochkaiLogo is ERC721URIStorage, ERC721Enumerable, Ownable {
       emit TokenCreated(newItemId);
     }
 
-    function getMaxSupply() public view returns (uint256) {
-      return maxSupply;
+    function getMaxSupply() public pure returns (uint256) {
+      return MAX_SUPPLY;
     }
 
     function safeMint(address to) public onlyOwner {

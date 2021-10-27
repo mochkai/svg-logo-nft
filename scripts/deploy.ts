@@ -4,22 +4,31 @@
 // When running the script with `npx hardhat run <script>` you'll find the Hardhat
 // Runtime Environment's members available in the global scope.
 import { ethers } from "hardhat";
+import { readFileSync } from "fs";
 
 async function main() {
-  // Hardhat always runs the compile task when running scripts with its command
-  // line interface.
-  //
-  // If this script is run directly using `node` you may want to call compile
-  // manually to make sure everything is compiled
-  // await hre.run('compile');
+  const [deployer] = await ethers.getSigners();
 
-  // We get the contract to deploy
-  const Greeter = await ethers.getContractFactory("Greeter");
-  const greeter = await Greeter.deploy("Hello, Hardhat!");
+  console.log("Deploying contracts with the account:", deployer.address);
 
-  await greeter.deployed();
+  const svgLogo = readFileSync("./assets/logo.svg", "utf-8").toString();
+  const metadata = JSON.stringify({
+    name: "Original logo",
+    image_data: "data:image/svg+xml;base64," + Buffer.from(svgLogo, "binary").toString("base64"),
+  });
 
-  console.log("Greeter deployed to:", greeter.address);
+  const MKLContract = await ethers.getContractFactory("MochkaiLogo");
+  const contract = await MKLContract.deploy();
+
+  await contract.deployed();
+
+  console.log("MKL deployed to:", contract.address);
+
+  const transaction = await contract.create(metadata);
+
+  const tx = await transaction.wait() // Waiting for the token to be minted
+
+  console.log(tx);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

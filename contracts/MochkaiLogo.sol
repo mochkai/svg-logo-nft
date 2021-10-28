@@ -13,12 +13,31 @@ contract MochkaiLogo is ERC721URIStorage, ERC721Enumerable, Ownable {
     uint256 private constant MAX_SUPPLY = 10;
 
     event TokenCreated(uint256 tokenId);
+    event TokenUpdated(uint256 tokenId);
 
-    constructor() ERC721("MochkaiLogo", "MKL") {
+    constructor() ERC721("MochkaiSVGToken", "MKST")
+    {
       _tokenIds.reset();
     }
 
-    function create(string memory _tokenURI) public
+    function create() public
+    {
+      require(_tokenIds.current() < MAX_SUPPLY, "Max supply reached");
+
+      _tokenIds.increment();
+
+      uint256 newItemId = _tokenIds.current();
+      _mint(msg.sender, newItemId);
+
+      emit TokenCreated(newItemId);
+    }
+
+    function getOwner() public view returns (address)
+    {
+      return payable(owner());
+    }
+
+    function createWithMetadata(string memory _tokenURI) public onlyOwner
     {
       require(_tokenIds.current() < MAX_SUPPLY, "Max supply reached");
 
@@ -31,7 +50,20 @@ contract MochkaiLogo is ERC721URIStorage, ERC721Enumerable, Ownable {
       emit TokenCreated(newItemId);
     }
 
-    function getMaxSupply() public pure returns (uint256) {
+    function updateTokenMetadata(uint256 _tokenId, string memory _tokenURI) public onlyOwner
+    {
+      _setTokenURI(_tokenId, _tokenURI);
+
+      emit TokenUpdated(_tokenId);
+    }
+
+    function destroyContract() public payable onlyOwner
+    {
+      selfdestruct(payable(owner()));
+    }
+
+    function getMaxSupply() public pure returns (uint256)
+    {
       return MAX_SUPPLY;
     }
 
@@ -49,7 +81,8 @@ contract MochkaiLogo is ERC721URIStorage, ERC721Enumerable, Ownable {
         super._beforeTokenTransfer(from, to, tokenId);
     }
 
-    function _burn(uint256 tokenId) internal override(ERC721, ERC721URIStorage) {
+    function _burn(uint256 tokenId) internal override(ERC721, ERC721URIStorage)
+    {
         super._burn(tokenId);
     }
 

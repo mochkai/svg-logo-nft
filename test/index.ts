@@ -5,27 +5,33 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { readFileSync } from "fs";
 
-describe("MockaiLogoContract", function () {
+let contractHash = '';
+let metadata = "";
+const SVG_LOGO = readFileSync("./assets/logo.svg", "utf-8").toString();
+
+describe("Deploying Mochkai Logo Contract", function () {
 
   let tokenURI = "";
-  let metadata = "";
   let maxSupply = -1;
   let contract: any;
 
   before(async function () {
-    const svgLogo = readFileSync("./assets/logo.svg", "utf-8").toString();
     metadata = JSON.stringify({
       name: "Original logo",
-      image: "data:image/svg+xml;base64," + Buffer.from(svgLogo, "binary").toString("base64"),
+      image: "data:image/svg+xml;base64," + Buffer.from(SVG_LOGO, "binary").toString("base64"),
     });
 
     const MKLContract = await ethers.getContractFactory("MochkaiLogo");
     contract = await MKLContract.deploy();
     await contract.deployed();
 
-    maxSupply = (await contract.getMaxSupply()).toNumber();
+    contractHash = contract.address;
 
-    const transaction = await contract.create(metadata);
+    maxSupply = (await contract.getMaxSupply()).toNumber();
+  });
+
+  it("Should mint a new logo and get the correct metadata back", async function () {
+    const transaction = await contract.createWithMetadata(metadata);
 
     const tx = await transaction.wait() // Waiting for the token to be minted
 
@@ -37,9 +43,7 @@ describe("MockaiLogoContract", function () {
         tokenURI = await contract.tokenURI(tokenId); // Using the tokenURI from ERC721 to retrieve de metadata
       }
     }
-  });
 
-  it("Should mint a new logo and get the correct metadata back", async function () {
     expect(tokenURI).to.be.equal(metadata); // Comparing and testing
   });
 
@@ -51,7 +55,7 @@ describe("MockaiLogoContract", function () {
     let transactions: any = [];
 
     for (let i = 2; i <= maxSupply; i++) {
-      transactions[i] = await contract.create(metadata);
+      transactions[i] = await contract.createWithMetadata(metadata);
 
       const tx = await transactions[i].wait();
 
@@ -68,10 +72,68 @@ describe("MockaiLogoContract", function () {
   });
 
   it("Should fail mint above max Supply", async function () {
-    await expect(contract.create(metadata)).to.be.revertedWith("Max supply reached");
+    await expect(contract.createWithMetadata(metadata)).to.be.revertedWith("Max supply reached");
   });
 
   it("Total Supply should be equal or less than max Supply", async function () {
     await expect((await contract.totalSupply()).toNumber()).to.be.lessThanOrEqual(maxSupply);
   });
+});
+
+describe("Checking Mochkai Logo Contract", function () {
+
+  let tokenURI = "";
+  let contract: any;
+
+  before(async function () {
+    const MKLContract = await ethers.getContractFactory("MochkaiLogo");
+    contract = await MKLContract.attach(contractHash);
+
+    await contract.deployed();
+
+    let _owner = await contract.getOwner();
+
+    //console.log("DESTROY CONTRACT: ", await contract.destroyContract());
+
+    //console.log("NOT SURE: ", contract.address);
+
+    // tokenURI = await contract.setTokenURI(1, metadata);
+
+    // console.log(tokenURI);
+  });
+
+  it("Check if contract is deployed", async function () {
+    expect(contract.address).to.be.equal(contractHash); // Comparing and testing
+  });
+
+  it("Check if token is deployed", async function () {
+    tokenURI = await contract.tokenURI(1);
+
+    expect(tokenURI).to.be.equal(metadata); // Comparing and testing
+  });
+
+  it("Update the metadata", async function () {
+    metadata = "data:application/json," + JSON.stringify({
+      name: "Original logo",
+      image: "data:image/svg+xml;base64," + Buffer.from(SVG_LOGO, "binary").toString("base64"),
+    });
+
+    await contract.updateTokenMetadata(1, metadata);
+
+    tokenURI = await contract.tokenURI(1);
+
+    expect(tokenURI).to.be.equal(metadata); // Comparing and testing
+  });
+
+  it("Contract can be destroyed by owner", async function () {
+    await contract.destroyContract();
+
+    const MKLContract = await ethers.getContractFactory("MochkaiLogo");
+    const noContract = await MKLContract.attach(contractHash);
+
+    await noContract.deployed().catch((_e) => {
+      expect(_e.reason).to.be.equal('contract not deployed');
+    });
+  });
+
 });

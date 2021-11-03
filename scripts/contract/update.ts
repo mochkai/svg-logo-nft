@@ -12,10 +12,6 @@ async function main() {
   console.log("Checking contracts with the account:", deployer.address);
 
   const svgLogo = readFileSync("./assets/logo.svg", "utf-8").toString();
-  const metadata = "data:application/json," + JSON.stringify({
-    name: "Original logo",
-    image_data: "data:image/svg+xml;base64," + Buffer.from(svgLogo, "binary").toString("base64"),
-  });
 
   const MKLContract = await ethers.getContractFactory("MochkaiLogo");
   const contract = await MKLContract.attach("0x880e8d04eD30d88A53dc3AE99044d6C1D07461cF");
@@ -24,9 +20,9 @@ async function main() {
 
   console.log("Found contract with address : ", contract.address);
 
-  await contract.updateTokenMetadata(1, metadata);
+  await contract.updateTokenMetadata(1, "https://ipfs.infura.io/ipfs/QmTMpNk1CQ3AMyTJUgvGxoXa3Wt5Be42km79GtZiNfFAdY/metadata.json");
 
-  console.log(await contract.tokenURI(1));
+  setTimeout(async () => console.log(await contract.tokenURI(1)), 5000);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

@@ -1,0 +1,33 @@
+{
+  "description": "This is a test token for Mochkai's contract using a SVG uploaded to the IPFS.",
+  "external_url": "https://mochkai.github.io/",
+  "image": "https://ipfs.infura.io/ipfs/QmZcxsMrWTQdPygwPy7fjsQxQYefUMDJzy9MVzX8EgMerd/logo.svg",
+  "background_color": "111199",
+  "name": "SVG Logo Token",
+  "attributes": [
+    {
+      "trait_type": "Base",
+      "value": "Dark Grey"
+    },
+    {
+      "trait_type": "Eye",
+      "value": "Blue"
+    },
+    {
+      "trait_type": "Visor",
+      "value": "Black"
+    },
+    {
+      "trait_type": "Outline",
+      "value": "White"
+    },
+    {
+      "trait_type": "Rotation",
+      "value": "White"
+    },
+    {
+      "trait_type": "Background",
+      "value": "Dark Blue"
+    }
+  ]
+}

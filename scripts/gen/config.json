@@ -1,0 +1,164 @@
+{
+  "Outline Color": [
+    {
+      "value": "FFFFFF",
+      "weight": 70
+    },
+    {
+      "value": "FD4444",
+      "weight": 20
+    },
+    {
+      "value": "FDCF44",
+      "weight": 5
+    },
+    {
+      "value": "4493FD",
+      "weight": 4.75
+    },
+    {
+      "value": "9AFD44",
+      "weight": 0.25
+    }
+  ],
+  "Background Color": [
+    {
+      "value": "001F70",
+      "weight": 70
+    },
+    {
+      "value": "007002",
+      "weight": 20
+    },
+    {
+      "value": "700000",
+      "weight": 4.75
+    },
+    {
+      "value": "706600",
+      "weight": 5
+    },
+    {
+      "value": "222222",
+      "weight": 0.25
+    }
+  ],
+  "Rotation": [
+    {
+      "value": 15,
+      "weight": 52
+    },
+    {
+      "value": 0,
+      "weight": 25
+    },
+    {
+      "value": 30,
+      "weight": 10
+    },
+    {
+      "value": -15,
+      "weight": 5
+    },
+    {
+      "value": -30,
+      "weight": 5
+    },
+    {
+      "value": 90,
+      "weight": 2.5
+    },
+    {
+      "value": 180,
+      "weight": 0.5
+    }
+  ],
+  "Vizor Color": [
+    {
+      "value": "222222",
+      "weight": 70
+    },
+    {
+      "value": "706600",
+      "weight": 20
+    },
+    {
+      "value": "700000",
+      "weight": 5
+    },
+    {
+      "value": "007002",
+      "weight": 4.75
+    },
+    {
+      "value": "001F70",
+      "weight": 0.25
+    }
+  ],
+  "Top Color": [
+    {
+      "value": "DDDDDD",
+      "weight": 70
+    },
+    {
+      "value": "CFC57C",
+      "weight": 20
+    },
+    {
+      "value": "80CF77",
+      "weight": 4.75
+    },
+    {
+      "value": "A07CCF",
+      "weight": 5
+    },
+    {
+      "value": "7CCFCB",
+      "weight": 0.25
+    }
+  ],
+  "Bottom Color": [
+    {
+      "value": "DDDDDD",
+      "weight": 70
+    },
+    {
+      "value": "80CF77",
+      "weight": 20
+    },
+    {
+      "value": "CFC57C",
+      "weight": 4.75
+    },
+    {
+      "value": "7CCFCB",
+      "weight": 5
+    },
+    {
+      "value": "A07CCF",
+      "weight": 0.25
+    }
+  ],
+  "Eye Color": [
+    {
+      "value": "0099EE",
+      "weight": 70
+    },
+    {
+      "value": "00EE5E",
+      "weight": 20
+    },
+    {
+      "value": "A800EE",
+      "weight": 4.75
+    },
+    {
+      "value": "EEDF00",
+      "weight": 5
+    },
+    {
+      "value": "EE4100",
+      "weight": 0.25
+    }
+  ]
+}

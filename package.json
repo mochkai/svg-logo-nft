@@ -42,6 +42,9 @@
     "typescript": "^4.4.4"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^4.3.2"
+    "@openzeppelin/contracts": "^4.3.2",
+    "nodemon": "^2.0.14",
+    "path-posix": "^1.0.0",
+    "random": "^3.0.6"
   }
 }

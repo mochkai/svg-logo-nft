@@ -2,11 +2,11 @@ import { AutoGen } from './autoGen';
 
 function main() {
   let gen = new AutoGen(10);
+  //gen = new AutoGen(1000);
 
   gen.setBaseSVG('assets/baseSVG.svg');
   gen.generateMetadataAttributes();
   gen.generateMetadata();
-
 
 }
 

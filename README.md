@@ -44,3 +44,20 @@ npx hardhat verify --network ropsten DEPLOYED_CONTRACT_ADDRESS "Hello, Hardhat!"
 # Performance optimizations
 
 For faster runs of your tests and scripts, consider skipping ts-node's type checking by setting the environment variable `TS_NODE_TRANSPILE_ONLY` to `1` in hardhat's environment. For more details see [the documentation](https://hardhat.org/guides/typescript.html#performance-optimizations).
+
+# General Notes
+
+## IPFS File Structure
+
+These are the two main project folders for the example script.
+mochkai-logo/images/*
+mochkai-logo/json/*
+
+Processing steps:
+1. Add all the images to the `mochkai-logo/images` folder.
+2. Update all the metadata items with the new image paths in the ipfs.
+  - This means the path hash will remain the same unless new images are added to the folder
+3. Generate and upload all of the json files to `mochkai-logo/json`.
+  - Once the upload finishes the fodler hash will stay fixed and can be added as the Token URI or Base Token URI
+4. Update the Token URI's with the metadata location.
+

@@ -43,6 +43,7 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.3.2",
+    "ipfs-core": "^0.11.1",
     "nodemon": "^2.0.14",
     "path-posix": "^1.0.0",
     "random": "^3.0.6"

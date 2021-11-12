@@ -7,8 +7,11 @@ async function main() {
   await gen.initIPFS();
   gen.setBaseSVG('assets/baseSVG.svg');
   gen.generateMetadataAttributes();
-  gen.generateMetadata();
+  await gen.generateMetadata();
+  await gen.generateJsonFiles();
 
+  console.log(gen.getJsonArray());
+  process.exit(1);
 }
 
 try {

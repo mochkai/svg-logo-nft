@@ -5,6 +5,7 @@
 // Runtime Environment's members available in the global scope.
 import { ethers } from "hardhat";
 import { readFileSync } from "fs";
+import { AutoGen } from '../gen/autoGen';
 
 async function main() {
   const [deployer] = await ethers.getSigners();
@@ -24,11 +25,23 @@ async function main() {
 
   console.log("MKL deployed to:", contract.address);
 
-  const transaction = await contract.createWithMetadata(metadata);
+  let supply = 10;
+  let gen = new AutoGen(supply);
 
-  const tx = await transaction.wait() // Waiting for the token to be minted
+  await gen.initIPFS();
+  gen.setBaseSVG('assets/baseSVG.svg');
+  gen.generateMetadataAttributes();
+  await gen.generateMetadata();
+  let jsonHash = await gen.generateJsonFiles();
 
-  console.log(tx);
+  for (let i = 0; i < supply; i++) {
+    const paddedNumber = i.toString().padStart(supply.toString().length, "0");
+    const transaction = await contract.createWithMetadata(`${jsonHash}/logo_${paddedNumber}.json`);
+
+    const tx = await transaction.wait() // Waiting for the token to be minted
+
+    console.log(tx);
+  }
 }
 
 // We recommend this pattern to be able to use async/await everywhere

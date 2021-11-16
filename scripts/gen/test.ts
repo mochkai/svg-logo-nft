@@ -8,9 +8,9 @@ async function main() {
   gen.setBaseSVG('assets/baseSVG.svg');
   gen.generateMetadataAttributes();
   await gen.generateMetadata();
-  await gen.generateJsonFiles();
+  let jsonHash = await gen.generateJsonFiles();
 
-  console.log(gen.getJsonArray());
+  console.log(jsonHash);
   process.exit(1);
 }
 

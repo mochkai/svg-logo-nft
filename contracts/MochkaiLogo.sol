@@ -11,13 +11,17 @@ contract MochkaiLogo is ERC721URIStorage, ERC721Enumerable, Ownable {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
     uint256 private constant MAX_SUPPLY = 10;
+    string private _customBaseURI = "";
 
     event TokenCreated(uint256 tokenId);
     event TokenUpdated(uint256 tokenId);
+    event BaseURIUpdated(string newBaseURI);
 
     constructor() ERC721("MochkaiSVGToken", "MKST")
     {
       _tokenIds.reset();
+
+      updateBaseURI("http://localhost:8080/ipfs/");
     }
 
     function create() public
@@ -57,6 +61,13 @@ contract MochkaiLogo is ERC721URIStorage, ERC721Enumerable, Ownable {
       emit TokenUpdated(_tokenId);
     }
 
+    function updateBaseURI(string memory _newURI) public onlyOwner
+    {
+      _customBaseURI = _newURI;
+
+      emit BaseURIUpdated(_customBaseURI);
+    }
+
     function destroyContract() public payable onlyOwner
     {
       selfdestruct(payable(owner()));
@@ -84,6 +95,16 @@ contract MochkaiLogo is ERC721URIStorage, ERC721Enumerable, Ownable {
     function _burn(uint256 tokenId) internal override(ERC721, ERC721URIStorage)
     {
         super._burn(tokenId);
+    }
+
+    function _baseURI() 
+      internal
+      view
+      virtual
+      override
+      returns (string memory)
+    {
+      return _customBaseURI;
     }
 
     function tokenURI(uint256 tokenId)

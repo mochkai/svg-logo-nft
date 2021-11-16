@@ -4,6 +4,8 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { readFileSync } from "fs";
+import { AutoGen } from "../scripts/gen/autoGen";
+import { json } from "stream/consumers";
 
 let contractHash = '';
 let metadata = "";
@@ -92,14 +94,6 @@ describe("Checking Mochkai Logo Contract", function () {
     await contract.deployed();
 
     let _owner = await contract.getOwner();
-
-    //console.log("DESTROY CONTRACT: ", await contract.destroyContract());
-
-    //console.log("NOT SURE: ", contract.address);
-
-    // tokenURI = await contract.setTokenURI(1, metadata);
-
-    // console.log(tokenURI);
   });
 
   it("Check if contract is deployed", async function () {
@@ -136,4 +130,54 @@ describe("Checking Mochkai Logo Contract", function () {
     });
   });
 
+});
+
+describe("Testing Mint with IPFS", function () {
+
+  let tokenURI = "";
+  let maxSupply = -1;
+  let contract: any;
+  let gen = null;
+  let jsonHash = '';
+
+  before(async function () {
+    const MKLContract = await ethers.getContractFactory("MochkaiLogo");
+    contract = await MKLContract.deploy();
+    await contract.deployed();
+
+    contractHash = contract.address;
+
+    maxSupply = (await contract.getMaxSupply()).toNumber();
+
+    gen = new AutoGen(maxSupply);
+
+    await gen.initIPFS();
+    gen.setBaseSVG('assets/baseSVG.svg');
+    gen.generateMetadataAttributes();
+    await gen.generateMetadata();
+
+    jsonHash = await gen.generateJsonFiles();
+  });
+
+  it("Mint suppy of logos with IPFS", async function () {
+
+    for (let i = 0; i < maxSupply; i++) {
+      const paddedNumber = i.toString().padStart(maxSupply.toString().length, "0");
+      const metadata = `${jsonHash}/logo_${paddedNumber}.json`;
+      const transaction = await contract.createWithMetadata(metadata);
+
+      const tx = await transaction.wait() // Waiting for the token to be minted
+
+      if (tx.events && tx.events.length > 0) {
+        const event = tx.events[0];
+        if (event.args) {
+          const value = event.args[2];
+          const tokenId = value.toNumber(); // Getting the tokenID
+          tokenURI = await contract.tokenURI(tokenId); // Using the tokenURI from ERC721 to retrieve de metadata
+        }
+      }
+
+      expect(tokenURI).to.be.equal(metadata); // Comparing and testing
+    }
+  });
 });

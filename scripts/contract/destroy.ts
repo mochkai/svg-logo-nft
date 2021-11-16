@@ -4,7 +4,6 @@
 // When running the script with `npx hardhat run <script>` you'll find the Hardhat
 // Runtime Environment's members available in the global scope.
 import { ethers } from "hardhat";
-import { readFileSync } from "fs";
 import * as readline from "readline";
 
 let MKLContract: any = null;
@@ -12,13 +11,7 @@ let MKLContract: any = null;
 async function main() {
   const [deployer] = await ethers.getSigners();
 
-  console.log("Checking contracts with the account:", deployer.address);
-
-  const svgLogo = readFileSync("./assets/logo.svg", "utf-8").toString();
-  const metadata = "data:application/json," + JSON.stringify({
-    name: "Original logo",
-    image_data: "data:image/svg+xml;base64," + Buffer.from(svgLogo, "binary").toString("base64"),
-  });
+  console.log("Find contracts with the account:", deployer.address);
 
   MKLContract = await ethers.getContractFactory("MochkaiLogo");
 
@@ -27,23 +20,23 @@ async function main() {
     output: process.stdout
   });
 
-  rl.question("What is the contract address you wish to destroy? ", function (answer) {
+  await rl.question("What is the contract address you wish to destroy? ", function (answer) {
     rl.close();
 
-    console.log("Checking contract: ", answer);
+    console.log("Destroying contract: ", answer);
 
-    checkContract(answer);
+    destroyContract(answer);
   });
 }
 
-async function checkContract(address: string) {
+async function destroyContract(address: string) {
   const contract = await MKLContract.attach(address); //0x880e8d04eD30d88A53dc3AE99044d6C1D07461cF
 
   await contract.deployed()
     .then(async () => {
       console.log("Found contract with address : ", contract.address)
 
-      console.log(await contract.tokenURI(1));
+      console.log(await contract.destroyContract());
     })
     .catch(() => console.log("Contract not found for address : ", contract.address));
 }

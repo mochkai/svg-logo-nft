@@ -30,7 +30,7 @@ async function main() {
 }
 
 async function destroyContract(address: string) {
-  const contract = await MKLContract.attach(address); //0x880e8d04eD30d88A53dc3AE99044d6C1D07461cF
+  const contract = await MKLContract.attach(address);
 
   await contract.deployed()
     .then(async () => {

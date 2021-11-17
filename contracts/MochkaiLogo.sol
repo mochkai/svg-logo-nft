@@ -10,7 +10,7 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 contract MochkaiLogo is ERC721URIStorage, ERC721Enumerable, Ownable {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
-    uint256 private constant MAX_SUPPLY = 10;
+    uint256 private constant MAX_SUPPLY = 10000;
     string private _customBaseURI = "";
 
     event TokenCreated(uint256 tokenId);
@@ -20,8 +20,6 @@ contract MochkaiLogo is ERC721URIStorage, ERC721Enumerable, Ownable {
     constructor() ERC721("MochkaiSVGToken", "MKST")
     {
       _tokenIds.reset();
-
-      updateBaseURI("http://localhost:8080/ipfs/");
     }
 
     function create() public
@@ -97,7 +95,7 @@ contract MochkaiLogo is ERC721URIStorage, ERC721Enumerable, Ownable {
         super._burn(tokenId);
     }
 
-    function _baseURI() 
+    function _baseURI()
       internal
       view
       virtual

@@ -27,7 +27,7 @@ async function main() {
     output: process.stdout
   });
 
-  rl.question("What is the contract address you wish to destroy? ", function (answer) {
+  rl.question("What is the contract address you wish to check? ", function (answer) {
     rl.close();
 
     console.log("Checking contract: ", answer);
@@ -37,15 +37,21 @@ async function main() {
 }
 
 async function checkContract(address: string) {
-  const contract = await MKLContract.attach(address); //0x880e8d04eD30d88A53dc3AE99044d6C1D07461cF
+  const contract = await MKLContract.attach(address); //0x944f6531455EFAAA3e533811625BB727840c1717
+
 
   await contract.deployed()
     .then(async () => {
-      console.log("Found contract with address : ", contract.address)
+      console.log("Found contract with address : ", contract.address);
 
-      console.log(await contract.tokenURI(1));
+      const supply = (await contract.totalSupply()).toNumber();
+
+      for (let i = 1; i <= supply; i++) {
+        console.log(await contract.tokenURI(i));
+      }
+
     })
-    .catch(() => console.log("Contract not found for address : ", contract.address));
+    .catch((error: any) => console.log(error));
 }
 
 // We recommend this pattern to be able to use async/await everywhere

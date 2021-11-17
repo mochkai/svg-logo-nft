@@ -3,25 +3,21 @@
 /* eslint-disable prefer-const */
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { readFileSync } from "fs";
 import { AutoGen } from "../scripts/gen/autoGen";
-import { json } from "stream/consumers";
 
 let contractHash = '';
-let metadata = "";
-const SVG_LOGO = readFileSync("./assets/logo.svg", "utf-8").toString();
+const BASE_URI = 'http://localhost:8080/ipfs/';
+let metadata = "logo_01.json";
 
 describe("Deploying Mochkai Logo Contract", function () {
+
+  this.timeout(0);
 
   let tokenURI = "";
   let maxSupply = -1;
   let contract: any;
 
   before(async function () {
-    metadata = JSON.stringify({
-      name: "Original logo",
-      image: "data:image/svg+xml;base64," + Buffer.from(SVG_LOGO, "binary").toString("base64"),
-    });
 
     const MKLContract = await ethers.getContractFactory("MochkaiLogo");
     contract = await MKLContract.deploy();
@@ -30,9 +26,13 @@ describe("Deploying Mochkai Logo Contract", function () {
     contractHash = contract.address;
 
     maxSupply = (await contract.getMaxSupply()).toNumber();
+
+    await contract.updateBaseURI(BASE_URI);
   });
 
   it("Should mint a new logo and get the correct metadata back", async function () {
+    const paddedNumber = (1).toString().padStart(maxSupply.toString().length, "0");
+    metadata = `logo_${paddedNumber}.json`;
     const transaction = await contract.createWithMetadata(metadata);
 
     const tx = await transaction.wait() // Waiting for the token to be minted
@@ -46,7 +46,7 @@ describe("Deploying Mochkai Logo Contract", function () {
       }
     }
 
-    expect(tokenURI).to.be.equal(metadata); // Comparing and testing
+    expect(tokenURI).to.be.equal(BASE_URI + metadata); // Comparing and testing
   });
 
   it("Should not fail minting", async function () {
@@ -57,6 +57,8 @@ describe("Deploying Mochkai Logo Contract", function () {
     let transactions: any = [];
 
     for (let i = 2; i <= maxSupply; i++) {
+      const paddedNumber = i.toString().padStart(maxSupply.toString().length, "0");
+      metadata = `logo_${paddedNumber}.json`;
       transactions[i] = await contract.createWithMetadata(metadata);
 
       const tx = await transactions[i].wait();
@@ -86,6 +88,7 @@ describe("Checking Mochkai Logo Contract", function () {
 
   let tokenURI = "";
   let contract: any;
+  let maxSupply = -1;
 
   before(async function () {
     const MKLContract = await ethers.getContractFactory("MochkaiLogo");
@@ -94,6 +97,10 @@ describe("Checking Mochkai Logo Contract", function () {
     await contract.deployed();
 
     let _owner = await contract.getOwner();
+
+    maxSupply = (await contract.getMaxSupply()).toNumber();
+
+    await contract.updateBaseURI(BASE_URI);
   });
 
   it("Check if contract is deployed", async function () {
@@ -101,22 +108,21 @@ describe("Checking Mochkai Logo Contract", function () {
   });
 
   it("Check if token is deployed", async function () {
+    const paddedNumber = (1).toString().padStart(maxSupply.toString().length, "0");
+    metadata = `logo_${paddedNumber}.json`;
+
     tokenURI = await contract.tokenURI(1);
 
-    expect(tokenURI).to.be.equal(metadata); // Comparing and testing
+    expect(tokenURI).to.be.equal(BASE_URI + metadata); // Comparing and testing
   });
 
   it("Update the metadata", async function () {
-    metadata = "data:application/json," + JSON.stringify({
-      name: "Original logo",
-      image: "data:image/svg+xml;base64," + Buffer.from(SVG_LOGO, "binary").toString("base64"),
-    });
-
+    metadata = "logo_new.json";
     await contract.updateTokenMetadata(1, metadata);
 
     tokenURI = await contract.tokenURI(1);
 
-    expect(tokenURI).to.be.equal(metadata); // Comparing and testing
+    expect(tokenURI).to.be.equal(BASE_URI + metadata); // Comparing and testing
   });
 
   it("Contract can be destroyed by owner", async function () {
@@ -134,11 +140,13 @@ describe("Checking Mochkai Logo Contract", function () {
 
 describe("Testing Mint with IPFS", function () {
 
+  this.timeout(0);
+
   let tokenURI = "";
   let maxSupply = -1;
   let contract: any;
   let gen = null;
-  let jsonHash = '';
+  let jsonHash: any = null;
 
   before(async function () {
     const MKLContract = await ethers.getContractFactory("MochkaiLogo");
@@ -149,21 +157,31 @@ describe("Testing Mint with IPFS", function () {
 
     maxSupply = (await contract.getMaxSupply()).toNumber();
 
-    gen = new AutoGen(maxSupply);
+    if (!jsonHash) {
+      gen = new AutoGen(maxSupply, {
+        name: "SVG Logo Test",
+        description: "This is just for hardhat test",
+        baseFolder: "/mochkai-logo-test/",
+        fileNamePrefix: "test_"
+      });
 
-    await gen.initIPFS();
-    gen.setBaseSVG('assets/baseSVG.svg');
-    gen.generateMetadataAttributes();
-    await gen.generateMetadata();
+      await gen.initIPFS();
+      gen.setBaseSVG('assets/baseSVG.svg');
+      gen.generateMetadata();
+      gen.generateSVG();
+      await gen.sendSVGFilesToIPFS();
+      gen.generateJsonFiles();
+      jsonHash = await gen.sendJSONFilesToIPFS();
+    }
 
-    jsonHash = await gen.generateJsonFiles();
+    await contract.updateBaseURI(BASE_URI + jsonHash + "/");
   });
 
-  it("Mint suppy of logos with IPFS", async function () {
+  it("Mint suply of logos with IPFS", async function () {
 
-    for (let i = 0; i < maxSupply; i++) {
+    for (let i = 1; i <= maxSupply; i++) {
       const paddedNumber = i.toString().padStart(maxSupply.toString().length, "0");
-      const metadata = `${jsonHash}/logo_${paddedNumber}.json`;
+      const metadata = `logo_${paddedNumber}.json`;
       const transaction = await contract.createWithMetadata(metadata);
 
       const tx = await transaction.wait() // Waiting for the token to be minted
@@ -177,7 +195,12 @@ describe("Testing Mint with IPFS", function () {
         }
       }
 
-      expect(tokenURI).to.be.equal(metadata); // Comparing and testing
+      //console.log(`Minting Logo#${paddedNumber}`);
+      expect(tokenURI).to.be.equal(BASE_URI + jsonHash + "/" + metadata); // Comparing and testing
     }
+  });
+
+  it("Check if all suply has been minted", async function () {
+    expect(maxSupply).to.be.equal((await contract.totalSupply()).toNumber());
   });
 });

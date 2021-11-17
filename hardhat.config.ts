@@ -25,7 +25,9 @@ const config: HardhatUserConfig = {
     },
     rinkeby: {
       url: RINKEBY_RPC_URL,
-      accounts: TESTNET_ACC
+      accounts: TESTNET_ACC,
+      gas: 2100000,
+      gasPrice: 8000000000
     }
   },
   gasReporter: {

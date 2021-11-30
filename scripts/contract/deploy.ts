@@ -9,7 +9,7 @@ import { AutoGen } from '../gen/autoGen';
 async function main() {
   const [deployer] = await ethers.getSigners();
   const ipfsGateway = 'https://infura-ipfs.io/ipfs/';
-  let jsonHash = 'QmUdPpayb4uwNxgMMGkcrbnNKWcrwDn6WSDKaCUCQw3pQd';
+  let jsonHash = 'QmNuEDz56kNBYkob3Mz2tViVtcaEqKQ8fukn9SM2EBsmLa';
 
   console.log("Deploying contracts with the account:", deployer.address);
 
@@ -44,11 +44,16 @@ async function main() {
 
   for (let i = 1; i <= supply; i++) {
     const paddedNumber = i.toString().padStart(supply.toString().length, "0");
-    const transaction = await contract.createWithMetadata(`logo_${paddedNumber}.json`);
-
-    const tx = await transaction.wait() // Waiting for the token to be minted
-
-    console.log(tx);
+    console.log(`Item ${paddedNumber} about to be deployed`);
+    contract.createWithMetadata(`logo_${paddedNumber}.json`)
+      .then(() => console.log(`Item ${paddedNumber} deployed successfully`))
+      .catch((error) => {
+        console.log('\x1b[31m%s\x1b[0m', `Error deploying item ${paddedNumber}`);
+        console.log(error);
+        console.log('Contract address: \x1b[32m%s\x1b[0m', contract.address);
+        process.exitCode = 1;
+        process.exit(1);
+      });
   }
 }
 
